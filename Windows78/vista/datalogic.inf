@@ -1,0 +1,280 @@
+; Licensed to Datalogic USA, Inc.
+;
+; Copyright (c) 2005-2015 Belcarra Technologies (2005) Corp
+;
+; NOTICE: This software is licensed, not sold. Any modification of
+; this INF file to change the reference to a new device or an operating
+; system is not permitted except as may be authorized in writing by
+; Belcarra.
+;
+
+; This package will install the:
+;
+;       Datalogic USBLAN driver
+;
+; This will enable an Datalogic Device to use Networking over USB protocols
+; to connect to Windows systems..
+;
+; For more information go to:
+;
+;       http://www.belcarra.com
+;
+; For licensing information to use the Belcarra USBLAN Driver contact:
+;
+;       sales@belcarra.com
+;
+
+
+[Version]
+Signature       = "$CHICAGO$"
+Class           = Net
+ClassGUID       = {4D36E972-E325-11CE-BFC1-08002BE10318}
+Provider        = "Datalogic"
+CatalogFile    	= datalogic.cat
+DriverVer       = 10/31/2016,02.04.11.002
+Compatible      = 1
+;DriverPackageDisplayName = "USBLAN"
+;DriverPackageType = PlugAndPlay
+
+; 
+; The INF file will match all versions of Windows allowing it to be used to
+; to install a single driver for:
+;
+;    - all types of Windows
+;    - only version 5 Windows 
+;    - version 6 (and newer) Windows
+;
+; This is slightly complicated by the semantics of the INF matching. 
+; 
+;    NTamd64.5.0                                specify a single match section for
+;                                               anything newer than 5.0
+;    NTamd64.5.0, NTamd64.6.0, NTamd64.6.3      specify three match sections, one
+;                                               for 5.0 and another for anything
+;                                               newer than 6.0 but not 6.3 and
+;                                               finally anything 6.3 or newer
+;
+; By specifying all versions and then not providing any VID/PID matches the
+; INF file can be targeted to specific OS versions.
+
+;
+; N.B. All of the matching keywords need to be declared in the manufacturer line.
+;
+[Manufacturer]
+%BTCUsbLan.Manufacturer% = Datalogic,  NTx86.5.0, NTamd64.5.0, NTx86.6.0, NTamd64.6.0, NTx86.6.1, NTamd64.6.1, NTx86.6.2, NTamd64.6.2
+
+;----------------------Windows XP and 2000 Specific----------------------------
+[BTCUsbLan.ndi]
+;Characteristics                         = 0x82          ; NCF_SOFTWARE_ENUMERATED, NCF_HAS_UI
+Characteristics                         = 0x84          ; NCF_PHYSICAL, NCF_HAS_UI
+BusType                                 = 15
+*IfType                                 = 6             ; IF_TYPE_ETHERNET_CSMACD
+*MediaType                              = 0             ; NdisMedium802_3
+*PhysicalMediaType                      = 0             ; NdisPhysicalMediumUnspecified
+;*PhysicalMediaType                      = 14            ; NdisPhysicalMedium802_3
+;*NdisDeviceType                         = 1             ; NDIS_DEVICE_TYPE_ENDPOINT (1)
+AddReg                                  = BTCUsbLan.Reg
+CopyFiles                               = BTCUsbLan.CopyFiles
+
+[ControlFlags]
+ExcludeFromSelect=*
+
+;-----------------------------------------------------------------------------
+[BTCUsbLan.Reg]
+HKR,    ,                       BusNumber,      0,  "0"
+HKR, Ndi,                       Service,        0,  "DatalogicUSBLAN"
+HKR, Ndi\Interfaces,            UpperRange,     0,  "ndis5"
+HKR, Ndi\Interfaces,            LowerRange,     0,  "ethernet"
+HKR,, *NdisDeviceType,          0x00010001,     1       
+
+; per adapter parameters
+; HKLM\System\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}\000N\Ndi
+;
+HKR, Ndi\params\NetworkAddress,     ParamDesc,  0,  "NetworkAddress"
+HKR, Ndi\params\NetworkAddress,     default,    0,  ""
+HKR, Ndi\params\NetworkAddress,     LimitText,  0,  "12"
+HKR, Ndi\params\NetworkAddress,     UpperCase,  0,  "1"
+HKR, Ndi\params\NetworkAddress,     optional,   0,  "1"
+HKR, Ndi\params\NetworkAddress,     type,       0,  "edit"
+HKR, Ndi\params\Jumboframe,        ParamDesc,  0, "JumboFrame"
+HKR, Ndi\params\Jumboframe,        default,    0, "0"
+HKR, Ndi\params\Jumboframe,        type,       0, "enum"
+HKR, Ndi\params\Jumboframe\enum,   "0",        0, "Disable"
+HKR, Ndi\params\Jumboframe\enum,   "3072",        0, "3KB MTU"
+HKR, Ndi\params\Jumboframe\enum,   "5120",        0, "5KB MTU"
+HKR, Ndi\params\Jumboframe\enum,   "7168",        0, "7KB MTU"
+HKR, Ndi\params\Jumboframe\enum,   "9216",        0, "9KB MTU"
+
+HKLM,SYSTEM\CURRENTCONTROLSET\SERVICES\DatalogicUSBLAN,DHCPDType,            0x00010003, 1
+HKLM,SYSTEM\CURRENTCONTROLSET\SERVICES\DatalogicUSBLAN,DHCPBase,             0x00010003, 0xa9fe0100
+HKLM,SYSTEM\CURRENTCONTROLSET\SERVICES\DatalogicUSBLAN,AddDnsServer,         0x00010003, 0x1
+HKLM,SYSTEM\CURRENTCONTROLSET\SERVICES\DatalogicUSBLAN,OEM,                  0x00010000, "9c2b63473748c0034d89a13abfe08eb0bdff4762fecabeb7bc7fc8e1ed7f2aa6a9f3e47b90c70308d7c80fcbadf682c71345c2f5d58d106161207a5276ade2f4"
+
+
+
+[BTCUsbLan.ndi.Services]
+AddService = "DatalogicUSBLAN", 2, BTCUsbLan.AddService
+
+[BTCUsbLan.AddService]
+DisplayName                             = "Datalogic USBLAN Service"
+ServiceType                             = 1    ; SERVICE_KERNEL_DRIVER
+StartType                               = 3    ; SERVICE_DEMAND_START
+ErrorControl                            = 1    ; NORMAL
+ServiceBinary                           = %12%\dlgblan.sys
+LoadOrderGroup                          = NDIS
+
+;-----------------------------------------------------------------------------
+; per enumerated adapter parameters
+; HKLM\System\CurrentControlSet\Enum\USB\<device_identifier>/{instance_identifier}\
+;
+
+[BTCUsbLan.ndi.HW]
+AddReg                                  = BTCUsbLan.HW.AddReg
+
+;[BTCUsbLan.ndi.nt.HW]
+;AddReg                                  = BTCUsbLan.HW.AddReg
+
+;[BTCUsbLan.ndi.ntamd64.HW]
+;AddReg                                  = BTCUsbLan.HW.AddReg
+
+;[BTCUsbLan.ndi.ntx86.HW]
+;AddReg                                  = BTCUsbLan.HW.AddReg
+
+[BTCUsbLan.HW.AddReg]
+HKR, ,RemovalPolicy, 0x00010001, 3
+HKR, ,SurpriseRemovalOK, 0x00010001, 1
+
+HKR, ,DeviceParameters\OriginalConfigurationValue, 0x00010001, 1
+HKR, ,DeviceParameters\AltConfigurationValue, 0x00010001, 0
+;HKR, DeviceParameters,OriginalConfigurationValue, 0x00010001, 1
+;HKR, DeviceParameters,AltConfigurationValue, 0x00010001, 0
+
+
+;---------------Common Variables-----------------------------------------------------------
+
+ 
+
+;[SourceDisksNames.x86]
+;1=%BTCUsbLan.DriverDiskName%,,,i386
+;
+;[SourceDisksNames.amd64]
+;1=%BTCUsbLan.DriverDiskName%,,,amd64
+
+[SourceDisksNames.x86]
+1=%BTCUsbLan.DriverDiskName%,,,i386
+
+[SourceDisksNames.amd64]
+1=%BTCUsbLan.DriverDiskName%,,,amd64
+
+
+[SourceDisksFiles]
+dlgblan.sys=1
+
+[DestinationDirs]
+BTCUsbLan.CopyFiles = 12 ; WINDOWS\SYSTEM32\DRIVERS
+
+[BTCUsbLan.CopyFiles]
+dlgblan.sys
+
+
+;-----------------------------------------------------------------------------
+
+[strings]
+
+;BTCUsbLan.Provider                      = "Datalogic"
+;BTCUsbLan.PackageDisplayName            = "USBLAN"
+;BTCUsbLan.Service.DispName              = "Datalogic USBLAN Service"
+
+BTCUsbLan.DeviceDesc                    = "Datalogic USBLAN Adapter"
+BTCUsbLan.Manufacturer                  = "Datalogic USA, Inc."
+BTCUsbLan.DriverDiskName                = "Datalogic Installation Directory"
+
+
+;-----------------------------------------------------------------------------
+
+
+
+;
+; This INF file WILL MATCH for .NTx86.5.0
+
+[Datalogic.NTx86.5.0]
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_00CE
+
+;
+; This INF file WILL MATCH for .NTamd64.5.0
+
+[Datalogic.NTamd64.5.0]
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_00CE
+
+;
+; This INF file WILL MATCH for .NTx86.6.0
+
+[Datalogic.NTx86.6.0]
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_00CE
+
+;
+; This INF file WILL MATCH for .NTamd64.6.0
+
+[Datalogic.NTamd64.6.0]
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042C&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_042D&MI_00
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB2\VID_05F9&PID_00CE
+%BTCUsbLan.DeviceDesc% = BTCUsbLan.ndi, USB3\VID_05F9&PID_00CE
+
+;
+; This section MUST BE PRESENT to prevent matching for .NTx86.6.1
+
+[Datalogic.NTx86.6.1]
+
+;
+; This section MUST BE PRESENT to prevent matching for .NTamd64.6.1
+
+[Datalogic.NTamd64.6.1]
+
+;
+; This section MUST BE PRESENT to prevent matching for .NTx86.6.2
+
+[Datalogic.NTx86.6.2]
+
+;
+; This section MUST BE PRESENT to prevent matching for .NTamd64.6.2
+
+[Datalogic.NTamd64.6.2]
+
+;
+; This section MUST BE PRESENT to prevent matching for .NTx86.10.0
+
+[Datalogic.NTx86.10.0]
+
+;
+; This section MUST BE PRESENT to prevent matching for .NTamd64.10.0
+
+[Datalogic.NTamd64.10.0]
