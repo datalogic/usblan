@@ -36,15 +36,15 @@ For each connected device instance, USBLAN creates a layer 2 network interface. 
 
 ### Driver Documentation
 
-- http://usblan.belcarra.com/p/updating-usblan.html
-- http://usblan.belcarra.com/p/uninstalling.html
-
+- [Updating USBLAN](http://usblan.belcarra.com/p/updating-usblan.html)
+- [Uninstalling Driver](http://usblan.belcarra.com/p/uninstalling.html)
+- [Belcarra USBLAN Manual](https://doc-00-1o-docs.googleusercontent.com/docs/securesc/ckfsqjp2lcml0t8qpr5m0cpbb9tmd4qr/9luj1jja9n6pr69ljjk67p4e8ooamp15/1558036800000/09964571699406653893/04841345876767909660/0BxfiY9AWawDDLTRIRHB2blp3T1E?e=file&nonce=6jiql9klht9q8&user=04841345876767909660&hash=ob4ft0dbjia0i9gpi0r6ifgjvh84gojo)
 
 ### Development using USBLAN driver
 
-- https://www.nuget.org/packages/datalogic-ce-sync/
+- [Datalogic CE Sync](https://www.nuget.org/packages/datalogic-ce-sync/) - DotNet package available via NuGet. Used to communicate over USBLAN with Datalogic Windows CE devices.
 
 ### Apps that use USBLAN
 
-- https://github.com/datalogic/device-sync
-- https://datalogic.github.io/dxu/
+- [Device Sync](https://github.com/datalogic/device-sync) - Windows command-line app  built using Datalogic CE Sync library
+- [Datalogic DXU](https://datalogic.github.io/dxu/) - Desktkop software capable of connecting to Datalogic Windows CE devices over USBLAN driver.
